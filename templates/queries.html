@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Queries — kabu-agent{% endblock %}
+{% block content %}
+<h1 class="page-title">Queries</h1>
+
+<div class="filter-bar">
+{% for key, q in queries.items() %}
+    <a href="/queries/{{ key }}" class="{% if query and query_name == key %}active{% endif %}">{{ q.name }}</a>
+{% endfor %}
+</div>
+
+{% if query %}
+<div class="section">
+    <div class="section-title">{{ query.name }}</div>
+    <p>{{ query.description }}</p>
+    <details class="sql-toggle">
+        <summary>Show SQL</summary>
+        <pre class="sql-code">{{ query.sql }}</pre>
+    </details>
+
+    {% if rows %}
+    <table>
+        <thead>
+            <tr>
+            {% for key in rows[0]._fields %}
+                <th>{{ key }}</th>
+            {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in rows %}
+            <tr>
+            {% for val in row %}
+                <td{% if val is number %} class="num"{% endif %}>
+                    {% if val is number %}{{ "%.2f"|format(val) if val < 100 else "{:,.0f}".format(val) }}{% elif loop.first %}<a href="/company/{{ val }}">{{ val }}</a>{% else %}{{ val }}{% endif %}
+                </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-state">No results. Ingest more companies with <code>pipeline.py</code>.</p>
+    {% endif %}
+</div>
+
+{% else %}
+<p class="empty-state">Select a screening query above.</p>
+{% endif %}
+{% endblock %}

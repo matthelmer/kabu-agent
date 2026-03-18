@@ -1,0 +1,9 @@
+edinet-tools>=0.4.2
+llm>=0.19
+llm-anthropic>=0.24
+llm-gemini>=0.29
+flask>=3.0
+flask-sqlalchemy>=3.1
+pydantic>=2.0
+python-dotenv>=1.0
+duckduckgo-search>=7.0

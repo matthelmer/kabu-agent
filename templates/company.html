@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+{% block title %}{{ ticker }} — kabu-agent{% endblock %}
+{% block content %}
+
+{% if company %}
+{# ===== COMPANY FACTSHEET ===== #}
+<div class="company-header">
+    <span class="ticker">{{ company.ticker }}</span>
+    <span class="name">{{ company.name }}</span>
+    {% if company.name_en %}<span class="name-en">{{ company.name_en }}</span>{% endif %}
+    {% if company.sector %}<span class="sector">{{ company.sector }}</span>{% endif %}
+    {% if latest_roe and financials %}
+    <div class="roe-headline">ROE {{ "%.1f"|format(latest_roe * 100) }}% · FY{{ financials[0].fiscal_year_end[:4] }}</div>
+    {% endif %}
+</div>
+
+{# --- Income --- #}
+{% if financials %}
+<div class="section">
+    <div class="section-title">Income</div>
+    <table>
+        <thead>
+            <tr>
+                <th>FY End</th>
+                <th class="num">Revenue (¥M)</th>
+                <th class="num">Op. Income (¥M)</th>
+                <th class="num">Net Income (¥M)</th>
+                <th class="num">ROE (%)</th>
+                <th class="num">EPS (¥)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in financials %}
+            <tr>
+                <td>{{ f.fiscal_year_end }}</td>
+                <td class="num">{% if f.revenue is not none %}{{ "{:,.0f}".format(f.revenue // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.operating_income is not none %}{{ "{:,.0f}".format(f.operating_income // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.net_income is not none %}{{ "{:,.0f}".format(f.net_income // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.roe is not none %}{{ "%.1f"|format(f.roe * 100) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.eps is not none %}{{ "{:,.0f}".format(f.eps) }}{% else %}—{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# --- Balance Sheet --- #}
+<div class="section">
+    <div class="section-title">Balance Sheet</div>
+    <table>
+        <thead>
+            <tr>
+                <th>FY End</th>
+                <th class="num">Total Assets (¥M)</th>
+                <th class="num">Net Assets (¥M)</th>
+                <th class="num">Equity Ratio (%)</th>
+                <th class="num">BPS (¥)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in financials %}
+            <tr>
+                <td>{{ f.fiscal_year_end }}</td>
+                <td class="num">{% if f.total_assets is not none %}{{ "{:,.0f}".format(f.total_assets // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.net_assets is not none %}{{ "{:,.0f}".format(f.net_assets // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.equity_ratio is not none %}{{ "%.1f"|format(f.equity_ratio * 100) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.bps is not none %}{{ "{:,.0f}".format(f.bps) }}{% else %}—{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# --- Cash Flows --- #}
+<div class="section">
+    <div class="section-title">Cash Flows</div>
+    <table>
+        <thead>
+            <tr>
+                <th>FY End</th>
+                <th class="num">Operating CF (¥M)</th>
+                <th class="num">Investing CF (¥M)</th>
+                <th class="num">Financing CF (¥M)</th>
+                <th class="num">FCF (¥M)</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in financials %}
+            <tr>
+                <td>{{ f.fiscal_year_end }}</td>
+                <td class="num">{% if f.operating_cf is not none %}{{ "{:,.0f}".format(f.operating_cf // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.investing_cf is not none %}{{ "{:,.0f}".format(f.investing_cf // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.financing_cf is not none %}{{ "{:,.0f}".format(f.financing_cf // 1000000) }}{% else %}—{% endif %}</td>
+                <td class="num">{% if f.operating_cf is not none and f.investing_cf is not none %}{{ "{:,.0f}".format((f.operating_cf + f.investing_cf) // 1000000) }}{% else %}—{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{# --- Trend Chart --- #}
+{% if chart_data %}
+<div class="section">
+    <div class="chart-container">
+        {% set width = 560 %}
+        {% set height = 180 %}
+        {% set pad_l = 60 %}
+        {% set pad_r = 20 %}
+        {% set pad_t = 20 %}
+        {% set pad_b = 25 %}
+        {% set plot_w = width - pad_l - pad_r %}
+        {% set plot_h = height - pad_t - pad_b %}
+        {% set n = chart_data.years|length %}
+        {% set y_range = chart_data.y_max - chart_data.y_min %}
+        {% set y_range_safe = y_range if y_range > 0 else 1 %}
+        {% set bar_w = (plot_w / n * 0.5)|int %}
+
+        <svg viewBox="0 0 {{ width }} {{ height }}" xmlns="http://www.w3.org/2000/svg">
+            <line class="chart-axis" x1="{{ pad_l }}" y1="{{ pad_t }}" x2="{{ pad_l }}" y2="{{ pad_t + plot_h }}" />
+            {% set zero_y = (pad_t + (chart_data.y_max / y_range_safe * plot_h))|int %}
+            <line class="chart-axis" x1="{{ pad_l }}" y1="{{ zero_y }}" x2="{{ pad_l + plot_w }}" y2="{{ zero_y }}" />
+            {% for i in range(n) %}
+                {% set cx = pad_l + (plot_w / n * (i + 0.5)) %}
+                {% set x = (cx - bar_w / 2)|int %}
+                {% set val = chart_data.revenue[i] %}
+                {% set val_y = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
+                {% set bar_h = ((val / y_range_safe) * plot_h)|int %}
+                {% if bar_h > 0 %}
+                <rect class="chart-bar" x="{{ x }}" y="{{ val_y }}" width="{{ bar_w }}" height="{{ bar_h }}" />
+                {% endif %}
+            {% endfor %}
+            {% set points = [] %}
+            {% for i in range(n) %}
+                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
+                {% set val = chart_data.net_income[i] %}
+                {% set cy = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
+                {% if points.append("{},{}".format(cx, cy)) %}{% endif %}
+            {% endfor %}
+            <polyline class="chart-line" points="{{ points|join(' ') }}" />
+            {% for i in range(n) %}
+                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
+                {% set val = chart_data.net_income[i] %}
+                {% set cy = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
+                <circle class="chart-dot" cx="{{ cx }}" cy="{{ cy }}" r="3" />
+            {% endfor %}
+            {% for i in range(n) %}
+                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
+                <text class="chart-label" x="{{ cx }}" y="{{ height - 5 }}" text-anchor="middle">{{ chart_data.years[i] }}</text>
+            {% endfor %}
+            <text class="chart-label" x="{{ pad_l - 5 }}" y="{{ pad_t + 4 }}" text-anchor="end">{{ "{:,.0f}".format(chart_data.y_max) }}</text>
+            <rect x="{{ pad_l + 5 }}" y="{{ pad_t - 12 }}" width="8" height="8" class="chart-bar" />
+            <text class="chart-label" x="{{ pad_l + 16 }}" y="{{ pad_t - 4 }}">Revenue</text>
+            <line x1="{{ pad_l + 70 }}" y1="{{ pad_t - 8 }}" x2="{{ pad_l + 82 }}" y2="{{ pad_t - 8 }}" class="chart-line" />
+            <text class="chart-label" x="{{ pad_l + 85 }}" y="{{ pad_t - 4 }}">Net Income</text>
+        </svg>
+    </div>
+</div>
+{% endif %}
+
+{# --- Shareholders --- #}
+{% if shareholders %}
+<div class="section">
+    <div class="section-title">Major Shareholders</div>
+    <table>
+        <thead><tr><th>Name</th><th class="num">Holding (%)</th></tr></thead>
+        <tbody>
+        {% for s in shareholders %}
+        <tr><td>{{ s.name }}{% if s.name_en %} <span class="name-en">{{ s.name_en }}</span>{% endif %}</td><td class="num">{{ "%.2f"|format(s.holding_ratio) }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{# --- Filing Activity --- #}
+{% if events or buybacks %}
+<div class="section">
+    <div class="section-title">Filing Activity</div>
+    <table>
+        <thead><tr><th>Date</th><th>Type</th><th>Detail</th></tr></thead>
+        <tbody>
+        {% for b in buybacks[:3] %}
+        <tr>
+            <td>{{ b.filing_date }}</td>
+            <td>Treasury Stock Report</td>
+            <td class="detail-cell">{% if b.board_resolution_text %}{{ b.board_resolution_text[:120] }}...{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+        {% for e in events[:3] %}
+        <tr>
+            <td>{{ e.filing_date }}</td>
+            <td>Extraordinary Report</td>
+            <td class="detail-cell">{{ e.reason_for_filing[:120] + '...' if e.reason_for_filing and e.reason_for_filing|length > 120 else (e.reason_for_filing or '—') }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if buybacks|length > 3 or events|length > 3 %}
+    <div class="table-note">Showing latest filings. {{ buybacks|length }} buyback reports, {{ events|length }} material events total.</div>
+    {% endif %}
+</div>
+{% endif %}
+
+{# ===== AGENT ANALYSIS ===== #}
+{% if analyst_data %}
+<div class="agent-section">
+    <div class="section-title">Analysis by Kabu Agents</div>
+
+    {% for i in range(analyst_data.theses|length) %}
+    <div class="thesis-block">
+        <div class="thesis-label">Thesis {{ i + 1 }}{% if cost_data and cost_data|length > 0 %} <span class="agent-model">{{ cost_data[0].model.split('/')[-1] }}</span>{% endif %}</div>
+        <div class="thesis-claim">{{ analyst_data.theses[i].thesis }}</div>
+        <div class="thesis-rationale">{{ analyst_data.theses[i].rationale }}</div>
+
+        {% if skeptic_data and skeptic_data.challenges and i < skeptic_data.challenges|length %}
+        <div class="thesis-skeptic">
+            <div class="thesis-skeptic-label">Skeptic{% if cost_data and cost_data|length > 1 %} <span class="agent-model">{{ cost_data[1].model.split('/')[-1] }}</span>{% endif %}</div>
+            {% if skeptic_data.challenges[i].counters %}
+            <ul class="counter-list">
+                {% for cp in skeptic_data.challenges[i].counters %}
+                <li>{{ cp.point }}<span class="counter-source">{{ cp.source }}</span></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if outlook_data %}
+    <div class="outlook-section">
+        <div class="outlook-label">Outlook{% if cost_data and cost_data|length > 2 %} <span class="agent-model">{{ cost_data[2].model.split('/')[-1] }}</span>{% endif %}</div>
+        <div class="outlook-text">{{ outlook_data.outlook }}</div>
+    </div>
+    {% endif %}
+
+    {% if analysis %}
+    <div class="analysis-meta">
+        {{ analysis.run_date }}
+        {% if cost_data %}
+         · {% for agent in cost_data %}{{ agent.name }} ({{ agent.model.split('/')[-1] }}, {{ agent.tool_calls }} tools){% if not loop.last %} · {% endif %}{% endfor %}
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{% elif entity %}
+{# ===== SKELETON FACTSHEET ===== #}
+<div class="company-header">
+    <span class="ticker">{{ ticker }}</span>
+    <span class="name">{{ entity.name_jp }}</span>
+    {% if entity.name_en %}<span class="name-en">{{ entity.name_en }}</span>{% endif %}
+    {% if entity.industry %}<span class="sector">{{ entity.industry }}</span>{% endif %}
+</div>
+
+<div class="skeleton-section">
+    <div class="section-title">Financials</div>
+    <p class="skeleton-hint">Run <code>pipeline.py {{ ticker }}</code> with an EDINET API key.</p>
+</div>
+<div class="skeleton-section">
+    <div class="section-title">Analysis by Kabu Agents</div>
+    <p class="skeleton-hint">Run <code>analyze.py {{ ticker }}</code> with LLM API keys.</p>
+</div>
+
+{% else %}
+<h1 class="page-title">Company not found</h1>
+<p>Ticker <strong>{{ ticker }}</strong> not found in the EDINET directory. <a href="/search">Search for it</a>.</p>
+{% endif %}
+
+{% endblock %}

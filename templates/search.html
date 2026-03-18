@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Search — kabu-agent{% endblock %}
+{% block content %}
+<h1 class="page-title">Search</h1>
+<form action="/search" method="get" class="search-form">
+    <input type="text" name="q" value="{{ query }}" placeholder="Company name or ticker (e.g., Toyota, 7203)">
+    <button type="submit">Search</button>
+</form>
+
+{% if query %}
+<p>{{ results|length }} results for "{{ query }}"</p>
+<table>
+    <thead>
+        <tr><th>Ticker</th><th>EDINET Code</th><th>Name</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    {% for e in results %}
+        <tr>
+            <td>{% if e.ticker %}<a href="/company/{{ e.ticker }}">{{ e.ticker }}</a>{% else %}—{% endif %}</td>
+            <td>{{ e.edinet_code }}</td>
+            <td>{{ e.name_jp }}</td>
+            <td>{% if e.is_listed %}Listed{% else %}Unlisted{% endif %}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% endblock %}

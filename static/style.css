@@ -1,0 +1,453 @@
+/* === Variables === */
+:root {
+    /* Typography — sans-serif throughout */
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    --fs-xs: 0.7rem;
+    --fs-sm: 0.8rem;
+    --fs-base: 0.875rem;
+    --fs-lg: 1rem;
+    --fs-xl: 1.25rem;
+
+    /* Colors — restrained monochrome */
+    --bg: #fafafa;
+    --bg-alt: #f4f4f4;
+    --bg-skeleton: #f8f8f6;
+    --fg: #1a1a1a;
+    --fg-dim: #666;
+    --fg-muted: #999;
+    --border: #ddd;
+    --border-skeleton: #ccc;
+    --accent: #333;
+    --accent-line: #2563eb;
+
+    /* Spacing */
+    --gap: 1.5rem;
+    --gap-sm: 0.75rem;
+}
+
+/* === Base === */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: var(--font);
+    font-size: var(--fs-base);
+    color: var(--fg);
+    background: var(--bg);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.5;
+}
+p { margin-bottom: var(--gap-sm); }
+h2 {
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    margin-bottom: var(--gap-sm);
+}
+
+/* === Header / Nav === */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--gap-sm);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--gap);
+}
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.nav-title {
+    font-size: var(--fs-base);
+    font-weight: 700;
+    color: var(--fg);
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+.nav-links a {
+    font-size: var(--fs-sm);
+    color: var(--fg-dim);
+    text-decoration: none;
+    margin-left: 1.5rem;
+}
+.nav-links a:hover { color: var(--fg); }
+
+/* === Footer === */
+footer {
+    margin-top: 3rem;
+    padding-top: var(--gap-sm);
+    border-top: 1px solid var(--border);
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+}
+footer a { color: var(--fg-dim); }
+
+/* === Tables === */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+    margin-bottom: var(--gap-sm);
+}
+th {
+    text-align: left;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    padding: 0.4rem 0.6rem;
+    border-bottom: 2px solid var(--border);
+}
+td {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+}
+td.num, th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* === Page Sections === */
+.page-title {
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    margin-bottom: var(--gap);
+}
+.section {
+    margin-bottom: 2rem;
+    padding-top: var(--gap-sm);
+}
+.section-title {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-dim);
+    margin-bottom: var(--gap-sm);
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--border);
+}
+
+/* === Company Header === */
+.company-header {
+    margin-bottom: var(--gap);
+    padding-bottom: var(--gap-sm);
+    border-bottom: 1px solid var(--border);
+}
+.company-header .ticker {
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+.company-header .name {
+    font-size: var(--fs-lg);
+    margin-left: 0.5rem;
+}
+.name-en,
+.company-header .name-en {
+    color: var(--fg-dim);
+    font-size: var(--fs-sm);
+    margin-left: 0.5rem;
+}
+.company-header .sector {
+    display: inline-block;
+    font-size: var(--fs-xs);
+    color: var(--fg-dim);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    margin-left: 0.5rem;
+}
+.company-header .roe-headline {
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-dim);
+    margin-top: 0.25rem;
+}
+
+/* === Skeleton Factsheet (non-ingested) === */
+.skeleton-section {
+    margin-bottom: var(--gap);
+    padding: var(--gap-sm) var(--gap);
+    background: var(--bg-skeleton);
+    border: 1px dashed var(--border-skeleton);
+    border-radius: 3px;
+}
+.skeleton-section .section-title {
+    border-bottom: none;
+    margin-bottom: 0.25rem;
+}
+.skeleton-hint {
+    font-size: var(--fs-sm);
+    color: var(--fg-muted);
+    font-style: italic;
+}
+.skeleton-hint code {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    background: var(--bg-alt);
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    font-style: normal;
+}
+
+/* === SVG Chart === */
+.chart-container {
+    margin-bottom: var(--gap);
+}
+.chart-container svg {
+    width: 100%;
+    max-width: 600px;
+}
+.chart-bar { fill: var(--accent); opacity: 0.7; }
+.chart-line { stroke: var(--accent-line); stroke-width: 2; fill: none; }
+.chart-dot { fill: var(--accent-line); }
+.chart-axis { stroke: var(--border); stroke-width: 1; }
+.chart-label {
+    font-family: var(--font);
+    font-size: var(--fs-xs);
+    fill: var(--fg-dim);
+}
+.chart-grid { stroke: var(--border); stroke-width: 0.5; stroke-dasharray: 2,2; }
+
+/* === Business Description === */
+.desc {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    color: var(--fg-dim);
+    margin-bottom: var(--gap);
+}
+
+/* === Two Column Layout === */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+}
+
+/* === Table Note === */
+.table-note {
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    margin-top: -0.25rem;
+}
+
+/* === Filing Detail Cell === */
+.detail-cell {
+    font-size: var(--fs-xs);
+    color: var(--fg-dim);
+    line-height: 1.4;
+}
+
+/* === Agent Analysis Section === */
+.agent-section {
+    margin-top: 2.5rem;
+    padding-top: var(--gap);
+    border-top: 3px solid var(--fg);
+}
+
+/* === Analysis Sections === */
+.thesis-block {
+    margin-bottom: var(--gap);
+    padding: var(--gap-sm);
+    background: var(--bg-alt);
+    border-radius: 3px;
+}
+.thesis-label {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-muted);
+    margin-bottom: 0.15rem;
+}
+.thesis-claim {
+    font-weight: 600;
+    font-size: var(--fs-base);
+    margin-bottom: 0.25rem;
+}
+.thesis-rationale {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    margin-bottom: var(--gap-sm);
+}
+.thesis-skeptic {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    padding: var(--gap-sm);
+    margin-top: var(--gap-sm);
+    border-left: 2px solid var(--fg-muted);
+    background: var(--bg);
+    color: var(--fg);
+}
+.thesis-skeptic-label {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    margin-bottom: 0.15rem;
+}
+.agent-model {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    color: var(--fg-muted);
+    font-size: 0.75em;
+}
+.counter-list {
+    margin: 0.25rem 0 0 1.2rem;
+    padding: 0;
+}
+.counter-list li {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin-bottom: 0.4rem;
+}
+.counter-source {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    font-style: italic;
+    margin-top: 0.1rem;
+}
+.source-item {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin-bottom: 0.3rem;
+}
+.outlook-section {
+    margin-top: var(--gap);
+    padding: var(--gap-sm);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+}
+.outlook-label {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    margin-bottom: 0.25rem;
+}
+.outlook-text {
+    font-size: var(--fs-base);
+    line-height: 1.6;
+}
+.outlook-sources {
+    margin-top: var(--gap-sm);
+    padding-top: var(--gap-sm);
+    border-top: 1px solid var(--border);
+}
+.analysis-meta {
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    margin-top: var(--gap);
+    padding-top: var(--gap-sm);
+    border-top: 1px solid var(--border);
+}
+.analysis-meta table {
+    font-size: var(--fs-xs);
+    margin-top: 0.25rem;
+    max-width: 400px;
+}
+
+/* === Filter Bar (companies page) === */
+.filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: var(--gap);
+    padding-bottom: var(--gap-sm);
+    border-bottom: 1px solid var(--border);
+}
+.filter-bar a {
+    font-size: var(--fs-sm);
+    color: var(--fg-dim);
+    text-decoration: none;
+    padding-bottom: 0.25rem;
+}
+.filter-bar a.active {
+    color: var(--fg);
+    border-bottom: 2px solid var(--accent);
+}
+
+/* === Search === */
+.search-form { display: flex; gap: 0.5rem; margin-bottom: var(--gap); }
+.search-form input { flex: 1; padding: 0.4rem 0.6rem; font-family: var(--font); font-size: var(--fs-base); border: 1px solid var(--border); border-radius: 3px; }
+.search-form button { padding: 0.4rem 1rem; font-family: var(--font); background: var(--accent); color: white; border: none; border-radius: 3px; cursor: pointer; font-size: var(--fs-sm); }
+
+/* === Empty State === */
+.empty-state {
+    color: var(--fg-muted);
+    font-style: italic;
+    font-size: var(--fs-sm);
+    padding: var(--gap-sm) 0;
+}
+.empty-state code {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    background: var(--bg-alt);
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    font-style: normal;
+}
+
+/* === Home / Index === */
+.home-tagline {
+    font-size: var(--fs-lg);
+    margin-bottom: var(--gap);
+}
+.tier {
+    margin-bottom: var(--gap);
+}
+.tier-title {
+    font-weight: 600;
+    font-size: var(--fs-base);
+}
+.tier-desc {
+    font-size: var(--fs-sm);
+    color: var(--fg-dim);
+}
+.tier code {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    background: var(--bg-alt);
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+}
+.company-count {
+    font-size: var(--fs-sm);
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-dim);
+    margin-top: var(--gap-sm);
+}
+
+/* === Utility === */
+.mono { font-family: var(--font-mono); }
+
+/* === Links === */
+a { color: var(--accent); }
+a:hover { color: var(--fg); }
+
+/* SQL toggle on queries page */
+.sql-toggle { margin: 0.5rem 0 1rem; }
+.sql-toggle summary {
+    cursor: pointer;
+    color: var(--fg-muted);
+    font-size: var(--fs-sm);
+}
+.sql-toggle summary:hover { color: var(--fg); }
+.sql-code {
+    font-family: var(--font-mono);
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+}

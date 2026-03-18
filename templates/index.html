@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}kabu-agent{% endblock %}
+{% block content %}
+<p class="home-tagline">Agentic equity research on Japanese companies. Open source.</p>
+
+<div class="tier">
+    <p class="tier-title">What's here</p>
+    <p class="tier-desc">{{ company_count }} companies with financials, shareholders, and <a href="/queries">screening queries</a>. <a href="/companies">Browse them</a>.</p>
+</div>
+
+<div class="tier">
+    <p class="tier-title">Add more</p>
+    <p class="tier-desc">3,800+ companies in the <a href="/search">EDINET directory</a>. Add an API key, ingest any company's filings.</p>
+</div>
+
+<div class="tier">
+    <p class="tier-title">Go deeper</p>
+    <p class="tier-desc">Competing AI analysts. An Analyst builds investment theses, a Skeptic challenges each one, an Outlook weighs both sides. Results on the <a href="/companies">company factsheet</a>.</p>
+</div>
+{% endblock %}

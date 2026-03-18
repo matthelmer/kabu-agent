@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}kabu-agent{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="nav-title">kabu-agent</a>
+            <span class="nav-links">
+                <a href="/companies">Companies</a>
+                <a href="/search">Search</a>
+                <a href="/queries">Queries</a>
+            </span>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        Built with <a href="https://github.com/matthelmer/edinet-tools">edinet-tools</a>
+        &middot; <a href="https://japanfinsight.com">japanfinsight.com</a>
+    </footer>
+</body>
+</html>
