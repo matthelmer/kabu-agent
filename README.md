@@ -1,4 +1,5 @@
 # kabu-agent
+### 株エージェント
 
 From EDINET filing to investment thesis.
 
