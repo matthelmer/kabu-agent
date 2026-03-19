@@ -40,7 +40,6 @@ class CounterPoint(BaseModel):
 
 
 class ThesisChallenge(BaseModel):
-    thesis: str = Field(description="The thesis being challenged")
     counters: List[CounterPoint] = Field(description="2-3 specific counter-arguments with sources")
 
 
@@ -71,6 +70,16 @@ When searching the web, use {_YEAR} for current-year results.
 """
 
 
+MODEL_DISPLAY_NAMES = {
+    "gemini-3-flash-preview": "Gemini Flash",
+    "anthropic/claude-sonnet-4-6": "Claude Sonnet",
+}
+
+
+def _display_name(model_id: str) -> str:
+    return MODEL_DISPLAY_NAMES.get(model_id, model_id)
+
+
 def detect_models() -> dict:
     """Detect available LLM providers and assign models.
 
@@ -95,25 +104,25 @@ def detect_models() -> dict:
             "skeptic": "anthropic/claude-sonnet-4-6",
             "outlook": "gemini-3-flash-preview",
         }
-        print(f"Models: Analyst={models['analyst']}, Skeptic={models['skeptic']}, Outlook={models['outlook']}")
     elif available.get("anthropic"):
         models = {
             "analyst": "anthropic/claude-sonnet-4-6",
             "skeptic": "anthropic/claude-sonnet-4-6",
             "outlook": "anthropic/claude-sonnet-4-6",
         }
-        print(f"Models: Analyst={models['analyst']}, Skeptic={models['skeptic']}, Outlook={models['outlook']}")
     elif available.get("gemini"):
         models = {
             "analyst": "gemini-3-flash-preview",
             "skeptic": "gemini-3-flash-preview",
             "outlook": "gemini-3-flash-preview",
         }
-        print(f"Models: Analyst={models['analyst']}, Skeptic={models['skeptic']}, Outlook={models['outlook']}")
     else:
         print("Error: No LLM providers available. Install llm-gemini or llm-anthropic.")
         sys.exit(1)
 
+    print(f"Models: Analyst={_display_name(models['analyst'])}, "
+          f"Skeptic={_display_name(models['skeptic'])}, "
+          f"Outlook={_display_name(models['outlook'])}")
     return models
 
 
@@ -131,12 +140,18 @@ def run_agent(name: str, model_id: str, prompt: str, tools: list, system: str,
 
     def after_call(tool, tool_call, tool_result):
         tool_calls.append(tool.name)
-        args_str = ", ".join(f"{k}={v!r}" for k, v in tool_call.arguments.items()) if tool_call.arguments else ""
+        # Show the most interesting argument value (first positional)
+        args = tool_call.arguments or {}
+        if args:
+            first_val = next(iter(args.values()))
+            display_arg = repr(first_val) if isinstance(first_val, str) else str(first_val)
+        else:
+            display_arg = ""
         result_preview = str(tool_result)[:200]
         if "error" in result_preview.lower() or "no results" in result_preview.lower() or "SQL error" in result_preview:
-            print(f"  [{name}] {tool.name}({args_str}) -> ERROR: {result_preview}")
+            print(f"  → {tool.name}({display_arg}) ✗")
         else:
-            print(f"  [{name}] {tool.name}({args_str})")
+            print(f"  → {tool.name}({display_arg})")
 
     # Phase 1: Research with tools
     response = conv.chain(
@@ -180,10 +195,10 @@ def run_agent(name: str, model_id: str, prompt: str, tools: list, system: str,
                 output_tokens += getattr(usage, "output", 0) or 0
         except Exception:
             pass
-        print(f"  {name}: {len(tool_calls)} tool calls, {input_tokens + output_tokens:,} tokens, model={model_id}")
+        print(f"  {name}: {len(tool_calls)} tool calls ({_display_name(model_id)})")
         return structured_text, {"name": name, "model": model_id, "tool_calls": len(tool_calls), "tokens": input_tokens + output_tokens}
 
-    print(f"  {name}: {len(tool_calls)} tool calls, {input_tokens + output_tokens:,} tokens, model={model_id}")
+    print(f"  {name}: {len(tool_calls)} tool calls ({_display_name(model_id)})")
     return research_text, {"name": name, "model": model_id, "tool_calls": len(tool_calls), "tokens": input_tokens + output_tokens}
 
 
@@ -230,7 +245,7 @@ def main():
 
         # === ANALYST ===
         print(f"\n{'='*50}")
-        print(f"Analyst researching {args.ticker} {co.name}...")
+        print(f"▸ Analyst — {args.ticker} {co.name}")
         print(f"{'='*50}")
 
         analyst_text, analyst_cost = run_agent(
@@ -251,9 +266,9 @@ def main():
         )
 
         analyst_report = AnalystReport.model_validate_json(analyst_text)
-        print(f"\nAnalyst produced {len(analyst_report.theses)} theses:")
+        print(f"\n  Theses:")
         for t in analyst_report.theses:
-            print(f"  - {t.thesis}")
+            print(f"    • {t.thesis}")
 
         if args.analyst_only:
             print("\n--analyst-only: skipping Skeptic and Outlook.")
@@ -261,7 +276,7 @@ def main():
 
         # === SKEPTIC ===
         print(f"\n{'='*50}")
-        print(f"Skeptic challenging theses...")
+        print(f"▸ Skeptic — challenging {len(analyst_report.theses)} theses")
         print(f"{'='*50}")
 
         theses_text = "\n\n".join(
@@ -275,7 +290,8 @@ def main():
             prompt=(
                 f"The Analyst has produced these investment theses for {co.name} ({args.ticker}). "
                 f"Challenge each one with 2-3 specific counter-arguments. For each thesis, find concrete risks, "
-                f"flaws, or contradicting evidence. Use the tools to verify claims.\n\n"
+                f"flaws, or contradicting evidence. Use the tools to verify claims. "
+                f"Return one challenge per thesis, in the same order.\n\n"
                 f"{theses_text}\n\n"
                 f"Company context:\n{context}"
             ),
@@ -288,16 +304,22 @@ def main():
         )
 
         skeptic_report = SkepticReport.model_validate_json(skeptic_text)
-        print(f"\nSkeptic produced {len(skeptic_report.challenges)} challenges.")
+        print(f"\n  Challenges:")
+        for i, c in enumerate(skeptic_report.challenges):
+            thesis_label = analyst_report.theses[i].thesis if i < len(analyst_report.theses) else f"Thesis {i+1}"
+            print(f"    • {thesis_label[:80]}")
+            for cp in c.counters[:2]:
+                print(f"      ↳ {cp.point[:100]}")
 
         # === OUTLOOK ===
         print(f"\n{'='*50}")
-        print(f"Outlook synthesizing...")
+        print(f"▸ Outlook — synthesizing")
         print(f"{'='*50}")
 
         outlook_input = f"Analyst theses:\n{theses_text}\n\nSkeptic challenges:\n"
-        for c in skeptic_report.challenges:
-            outlook_input += f"\nOn '{c.thesis}':\n"
+        for i, c in enumerate(skeptic_report.challenges):
+            thesis_label = analyst_report.theses[i].thesis if i < len(analyst_report.theses) else f"Thesis {i+1}"
+            outlook_input += f"\nOn '{thesis_label}':\n"
             for cp in c.counters:
                 outlook_input += f"  - {cp.point} [{cp.source}]\n"
 
@@ -322,7 +344,7 @@ def main():
 
         outlook_summary = OutlookSummary.model_validate_json(outlook_text)
 
-        print(f"\nOutlook: {outlook_summary.outlook}")
+        print(f"\n  {outlook_summary.outlook}")
 
         # === SAVE TO DB ===
         analysis = Analysis(
@@ -336,8 +358,11 @@ def main():
         db.session.add(analysis)
         db.session.commit()
 
-        total_tokens = analyst_cost["tokens"] + skeptic_cost["tokens"] + outlook_cost["tokens"]
-        print(f"\nAnalysis saved. {total_tokens:,} total tokens.")
+        total_tools = analyst_cost["tool_calls"] + skeptic_cost["tool_calls"] + outlook_cost["tool_calls"]
+        print(f"\n{'='*50}")
+        print(f"Done — {len(analyst_report.theses)} theses, "
+              f"{len(skeptic_report.challenges)} challenges, "
+              f"{total_tools} tool calls")
         print(f"View at: http://localhost:5000/company/{args.ticker}")
 
 

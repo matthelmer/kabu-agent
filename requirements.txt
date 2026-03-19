@@ -1,4 +1,4 @@
-edinet-tools>=0.4.2
+edinet-tools>=0.4.3
 llm>=0.19
 llm-anthropic>=0.24
 llm-gemini>=0.29

@@ -9,15 +9,13 @@ Ingests regulatory filings, extracts financials and shareholders, screens for qu
 
 [EDINET](https://disclosure.edinet-fsa.go.jp/) is Japan's regulatory filing system — the SEC EDGAR equivalent.
 
-Built on [edinet-tools](https://github.com/matthelmer/edinet-tools) and Simon Willison's [llm](https://github.com/simonw/llm).
-
 ## Browse — no keys needed
 
     pip install -r requirements.txt
     cp .env.example .env
     flask run
 
-25 companies with financials, shareholders, and screening queries pre-loaded.
+50 companies with financials, shareholders, and screening queries pre-loaded.
 A few have pre-computed agent analyses so you can see the full output without configuring any API keys.
 
 ## Ingest — add EDINET API key
@@ -27,15 +25,17 @@ A few have pre-computed agent analyses so you can see the full output without co
     python pipeline.py 6758 --doc-type 220     # buyback activity
     python seed.py --rebuild-index             # refresh filing index
 
-Any of 3,800+ listed companies.  Each doc type adds data to the company factsheet presentation.
+Any of 3,800+ listed companies.  Each doc type adds data to the company factsheet.
 
-## Analyze with Agents — add LLM keys
+## Analyze — add LLM keys
 
     python analyze.py 7203
 
 Analyst builds 2-3 investment theses with supporting evidence.
 Skeptic challenges each thesis with specific counter-arguments.
 Outlook weighs both sides.  Analysis appears on the company page.
+
+Different models for different roles. The Analyst is cheap and fast. The Skeptic needs to push back — it costs more.
 
 ## Architecture
 
@@ -53,7 +53,7 @@ Screening Queries (SQL against local data)
      ↓
 Multi-Agent Analysis
   Analyst (Gemini Flash) → Skeptic (Sonnet) → Outlook (Flash)
-  Tools: typed queries, web search
+  7 tools: typed queries + web search
 ```
 
 App runs locally.  The database is SQLite.  Add companies, doc types, screening queries, or agent tools.
@@ -68,13 +68,13 @@ App runs locally.  The database is SQLite.  Add companies, doc types, screening 
 
 - **Web search in Japanese.** Returns 10x better results for Japanese companies.  Put language guidance in tool docstrings, models follow reliably.
 
-- **Log per-agent cost.** When you can see that the Skeptic costs 10x the Analyst, you ask better questions about whether the quality difference justifies it.
+- **Single runs are unreliable for ranking.** Same prompt, different top outlook each run.  Use screening queries as an initial candidate shortlist.  Human judgment still makes the key decisions.
 
-- **Single runs are unreliable for ranking.** Same prompt, different top outlook each run.  This app uses screening queries as an initial candidate shortlist.  Human judgment is still making key decisions about system.
+## Beyond this repo
 
-## Beyond the demo
+The production system runs daily across 400K+ filings and 3,800 listed companies. I use it to make investment decisions. This repo demonstrates one pattern for agentic research on Japanese equities.
 
-The production system behind japanfinsight.com runs daily across 400K+ filings and 3,800 listed companies. This repo demonstrates the pattern.
+Built on [edinet-tools](https://github.com/matthelmer/edinet-tools) and Simon Willison's [llm](https://github.com/simonw/llm).
 
 ---
 

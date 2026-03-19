@@ -105,6 +105,9 @@ td {
     padding: 0.4rem 0.6rem;
     border-bottom: 1px solid var(--border);
 }
+tbody tr:hover {
+    background: var(--bg-alt);
+}
 td.num, th.num {
     text-align: right;
     font-variant-numeric: tabular-nums;
@@ -137,6 +140,12 @@ td.num, th.num {
     padding-bottom: var(--gap-sm);
     border-bottom: 1px solid var(--border);
 }
+.company-header-top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
 .company-header .ticker {
     font-size: var(--fs-xl);
     font-weight: 700;
@@ -144,13 +153,6 @@ td.num, th.num {
 }
 .company-header .name {
     font-size: var(--fs-lg);
-    margin-left: 0.5rem;
-}
-.name-en,
-.company-header .name-en {
-    color: var(--fg-dim);
-    font-size: var(--fs-sm);
-    margin-left: 0.5rem;
 }
 .company-header .sector {
     display: inline-block;
@@ -159,13 +161,34 @@ td.num, th.num {
     border: 1px solid var(--border);
     padding: 0.1rem 0.4rem;
     border-radius: 2px;
-    margin-left: 0.5rem;
 }
 .company-header .roe-headline {
     font-size: var(--fs-sm);
     font-variant-numeric: tabular-nums;
     color: var(--fg-dim);
     margin-top: 0.25rem;
+}
+
+/* === Name hierarchy: English primary, Japanese secondary === */
+.name-jp {
+    font-size: var(--fs-sm);
+    color: var(--fg-muted);
+    margin-top: 0.15rem;
+}
+.name-jp-inline {
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    margin-left: 0.4rem;
+}
+.shareholder-name span:first-child {
+    display: block;
+}
+.shareholder-name .name-jp {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    margin-top: 0.1rem;
+    line-height: 1.3;
 }
 
 /* === Skeleton Factsheet (non-ingested) === */
@@ -194,24 +217,56 @@ td.num, th.num {
     font-style: normal;
 }
 
-/* === SVG Chart === */
+/* === SVG Charts === */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-sm);
+    margin-bottom: 2rem;
+}
+@media (max-width: 768px) {
+    .chart-grid { grid-template-columns: 1fr; }
+}
 .chart-container {
-    margin-bottom: var(--gap);
+    margin-bottom: var(--gap-sm);
 }
 .chart-container svg {
     width: 100%;
-    max-width: 600px;
+}
+.chart-title {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    margin-bottom: 0.25rem;
 }
 .chart-bar { fill: var(--accent); opacity: 0.7; }
+.chart-bar-accent { fill: var(--accent-line); opacity: 0.6; }
+.chart-bar-eq { fill: #94a3b8; opacity: 0.5; }
+.chart-bar-cf { fill: #0d9488; opacity: 0.7; }
+.chart-bar-cf-accent { fill: #6ee7b7; opacity: 0.7; }
+.chart-bar-neg { fill: #dc2626; opacity: 0.5; }
+.chart-bar-bps { fill: #7c3aed; opacity: 0.4; }
+.chart-line-bps { stroke: #7c3aed; stroke-width: 2; fill: none; }
+.chart-dot-bps { fill: #7c3aed; }
 .chart-line { stroke: var(--accent-line); stroke-width: 2; fill: none; }
+.chart-line-roe { stroke: #059669; stroke-width: 2; fill: none; }
 .chart-dot { fill: var(--accent-line); }
+.chart-dot-roe { fill: #059669; }
 .chart-axis { stroke: var(--border); stroke-width: 1; }
 .chart-label {
     font-family: var(--font);
     font-size: var(--fs-xs);
     fill: var(--fg-dim);
 }
-.chart-grid { stroke: var(--border); stroke-width: 0.5; stroke-dasharray: 2,2; }
+.chart-grid-line { stroke: var(--border); stroke-width: 0.5; stroke-dasharray: 2,2; }
+
+/* === Compact Table === */
+.table-compact th, .table-compact td {
+    padding: 0.3rem 0.5rem;
+    font-size: var(--fs-xs);
+}
 
 /* === Business Description === */
 .desc {
@@ -250,17 +305,30 @@ td.num, th.num {
 }
 
 /* === Analysis Sections === */
-.thesis-block {
+.agent-phase {
     margin-bottom: var(--gap);
-    padding: var(--gap-sm);
-    background: var(--bg-alt);
-    border-radius: 3px;
 }
-.thesis-label {
+.agent-phase-label {
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    color: var(--fg-dim);
+    margin-bottom: var(--gap-sm);
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--border);
+}
+.thesis-block {
+    margin-bottom: var(--gap-sm);
+    padding: var(--gap-sm);
+    background: var(--bg-alt);
+    border-radius: 3px;
+}
+.thesis-number {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     color: var(--fg-muted);
     margin-bottom: 0.15rem;
 }
@@ -272,24 +340,39 @@ td.num, th.num {
 .thesis-rationale {
     font-size: var(--fs-sm);
     line-height: 1.6;
+}
+.challenge-block {
     margin-bottom: var(--gap-sm);
 }
-.thesis-skeptic {
-    font-size: var(--fs-sm);
-    line-height: 1.6;
-    padding: var(--gap-sm);
-    margin-top: var(--gap-sm);
-    border-left: 2px solid var(--fg-muted);
-    background: var(--bg);
-    color: var(--fg);
-}
-.thesis-skeptic-label {
+.challenge-thesis {
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--fg-dim);
-    margin-bottom: 0.15rem;
+    letter-spacing: 0.03em;
+    color: var(--fg-muted);
+    margin-bottom: 0.3rem;
+}
+.counter-point {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+    margin-bottom: 0.3rem;
+}
+.footnote-ref {
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    cursor: default;
+}
+.footnotes {
+    margin-top: var(--gap-sm);
+    padding-top: var(--gap-sm);
+    border-top: 1px solid var(--border);
+}
+.footnote {
+    display: inline;
+    font-size: var(--fs-xs);
+    color: var(--fg-muted);
+    margin-right: 1rem;
+    line-height: 1.8;
 }
 .agent-model {
     font-weight: 400;
@@ -297,22 +380,6 @@ td.num, th.num {
     letter-spacing: normal;
     color: var(--fg-muted);
     font-size: 0.75em;
-}
-.counter-list {
-    margin: 0.25rem 0 0 1.2rem;
-    padding: 0;
-}
-.counter-list li {
-    font-size: var(--fs-sm);
-    line-height: 1.5;
-    margin-bottom: 0.4rem;
-}
-.counter-source {
-    display: block;
-    font-size: var(--fs-xs);
-    color: var(--fg-muted);
-    font-style: italic;
-    margin-top: 0.1rem;
 }
 .source-item {
     font-size: var(--fs-sm);
@@ -398,6 +465,12 @@ td.num, th.num {
 /* === Home / Index === */
 .home-tagline {
     font-size: var(--fs-lg);
+    margin-bottom: 0.25rem;
+}
+.home-subtitle {
+    font-size: var(--fs-sm);
+    color: var(--fg-dim);
+    line-height: 1.6;
     margin-bottom: var(--gap);
 }
 .tier {

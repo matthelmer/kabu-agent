@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 {% block title %}kabu-agent{% endblock %}
 {% block content %}
-<p class="home-tagline">Agentic equity research on Japanese companies. Open source.</p>
+<p class="home-tagline">Agentic equity research on Japanese companies.</p>
+<p class="home-subtitle">Competing AI analysts that build investment theses from regulatory filings, challenge them, and produce an outlook. {{ company_count }} companies from the <a href="/search">EDINET directory</a>.</p>
 
 <div class="tier">
-    <p class="tier-title">What's here</p>
-    <p class="tier-desc">{{ company_count }} companies with financials, shareholders, and <a href="/queries">screening queries</a>. <a href="/companies">Browse them</a>.</p>
+    <p class="tier-title">Browse</p>
+    <p class="tier-desc">Financials, shareholders, and <a href="/queries">screening queries</a> pre-loaded. <a href="/companies">Browse companies</a>.</p>
 </div>
 
 <div class="tier">
-    <p class="tier-title">Add more</p>
-    <p class="tier-desc">3,800+ companies in the <a href="/search">EDINET directory</a>. Add an API key, ingest any company's filings.</p>
+    <p class="tier-title">Ingest</p>
+    <p class="tier-desc">Add an EDINET API key. Point the pipeline at any of 3,800+ listed companies.</p>
 </div>
 
 <div class="tier">
-    <p class="tier-title">Go deeper</p>
-    <p class="tier-desc">Competing AI analysts. An Analyst builds investment theses, a Skeptic challenges each one, an Outlook weighs both sides. Results on the <a href="/companies">company factsheet</a>.</p>
+    <p class="tier-title">Analyze</p>
+    <p class="tier-desc">Run competing agents — Analyst, Skeptic, Outlook — on any company in your database. Results on the <a href="/companies">company factsheet</a>.</p>
 </div>
 {% endblock %}

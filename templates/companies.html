@@ -19,7 +19,7 @@
     {% for item in company_data %}
         <tr>
             <td class="mono"><a href="/company/{{ item.company.ticker }}">{{ item.company.ticker }}</a></td>
-            <td>{{ item.company.name }}{% if item.company.name_en %} <span class="name-en">{{ item.company.name_en }}</span>{% endif %}</td>
+            <td>{{ item.company.name_en or item.company.name }}{% if item.company.name_en and item.company.name != item.company.name_en %} <span class="name-jp-inline">{{ item.company.name }}</span>{% endif %}</td>
             <td>{{ item.company.sector or '—' }}</td>
             <td class="num">{% if item.latest and item.latest.revenue %}{{ "{:,.0f}".format(item.latest.revenue // 1000000) }}{% else %}—{% endif %}</td>
             <td class="num">{% if item.latest and item.latest.roe %}{{ "%.1f"|format(item.latest.roe * 100) }}{% else %}—{% endif %}</td>

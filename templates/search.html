@@ -18,7 +18,7 @@
         <tr>
             <td>{% if e.ticker %}<a href="/company/{{ e.ticker }}">{{ e.ticker }}</a>{% else %}—{% endif %}</td>
             <td>{{ e.edinet_code }}</td>
-            <td>{{ e.name_jp }}</td>
+            <td>{% if e.name_en %}{{ e.name_en }} <span class="name-jp-inline">{{ e.name_jp }}</span>{% else %}{{ e.name_jp }}{% endif %}</td>
             <td>{% if e.is_listed %}Listed{% else %}Unlisted{% endif %}</td>
         </tr>
     {% endfor %}

@@ -5,200 +5,244 @@
 {% if company %}
 {# ===== COMPANY FACTSHEET ===== #}
 <div class="company-header">
-    <span class="ticker">{{ company.ticker }}</span>
-    <span class="name">{{ company.name }}</span>
-    {% if company.name_en %}<span class="name-en">{{ company.name_en }}</span>{% endif %}
-    {% if company.sector %}<span class="sector">{{ company.sector }}</span>{% endif %}
+    <div class="company-header-top">
+        <span class="ticker">{{ company.ticker }}</span>
+        <span class="name">{{ company.name_en or company.name }}</span>
+        {% if company.sector %}<span class="sector">{{ company.sector }}</span>{% endif %}
+    </div>
+    {% if company.name_en and company.name != company.name_en %}
+    <div class="name-jp">{{ company.name }}</div>
+    {% endif %}
     {% if latest_roe and financials %}
     <div class="roe-headline">ROE {{ "%.1f"|format(latest_roe * 100) }}% · FY{{ financials[0].fiscal_year_end[:4] }}</div>
     {% endif %}
 </div>
 
-{# --- Income --- #}
+{# --- Financials (two tables, Shikiho style) --- #}
 {% if financials %}
-<div class="section">
-    <div class="section-title">Income</div>
-    <table>
-        <thead>
-            <tr>
-                <th>FY End</th>
-                <th class="num">Revenue (¥M)</th>
-                <th class="num">Op. Income (¥M)</th>
-                <th class="num">Net Income (¥M)</th>
-                <th class="num">ROE (%)</th>
-                <th class="num">EPS (¥)</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for f in financials %}
-            <tr>
-                <td>{{ f.fiscal_year_end }}</td>
-                <td class="num">{% if f.revenue is not none %}{{ "{:,.0f}".format(f.revenue // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.operating_income is not none %}{{ "{:,.0f}".format(f.operating_income // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.net_income is not none %}{{ "{:,.0f}".format(f.net_income // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.roe is not none %}{{ "%.1f"|format(f.roe * 100) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.eps is not none %}{{ "{:,.0f}".format(f.eps) }}{% else %}—{% endif %}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+<div class="two-col">
+    <div class="section">
+        <div class="section-title">Income & Returns</div>
+        <table class="table-compact">
+            <thead>
+                <tr>
+                    <th>FY</th>
+                    <th class="num">Revenue</th>
+                    <th class="num">Op Inc</th>
+                    <th class="num">Net Inc</th>
+                    <th class="num">ROE</th>
+                    <th class="num">EPS</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in financials|reverse %}
+                <tr>
+                    <td>{{ f.fiscal_year_end[:4] }}</td>
+                    <td class="num">{% if f.revenue is not none %}{{ "{:,.0f}".format(f.revenue // 1000000) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.operating_income is not none %}{{ "{:,.0f}".format(f.operating_income // 1000000) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.net_income is not none %}{{ "{:,.0f}".format(f.net_income // 1000000) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.roe is not none %}{{ "%.1f"|format(f.roe * 100) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.eps is not none %}{{ "{:,.0f}".format(f.eps) }}{% else %}—{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="table-note">¥M except EPS (¥)</div>
+    </div>
 
-{# --- Balance Sheet --- #}
-<div class="section">
-    <div class="section-title">Balance Sheet</div>
-    <table>
-        <thead>
-            <tr>
-                <th>FY End</th>
-                <th class="num">Total Assets (¥M)</th>
-                <th class="num">Net Assets (¥M)</th>
-                <th class="num">Equity Ratio (%)</th>
-                <th class="num">BPS (¥)</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for f in financials %}
-            <tr>
-                <td>{{ f.fiscal_year_end }}</td>
-                <td class="num">{% if f.total_assets is not none %}{{ "{:,.0f}".format(f.total_assets // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.net_assets is not none %}{{ "{:,.0f}".format(f.net_assets // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.equity_ratio is not none %}{{ "%.1f"|format(f.equity_ratio * 100) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.bps is not none %}{{ "{:,.0f}".format(f.bps) }}{% else %}—{% endif %}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-{# --- Cash Flows --- #}
-<div class="section">
-    <div class="section-title">Cash Flows</div>
-    <table>
-        <thead>
-            <tr>
-                <th>FY End</th>
-                <th class="num">Operating CF (¥M)</th>
-                <th class="num">Investing CF (¥M)</th>
-                <th class="num">Financing CF (¥M)</th>
-                <th class="num">FCF (¥M)</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for f in financials %}
-            <tr>
-                <td>{{ f.fiscal_year_end }}</td>
-                <td class="num">{% if f.operating_cf is not none %}{{ "{:,.0f}".format(f.operating_cf // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.investing_cf is not none %}{{ "{:,.0f}".format(f.investing_cf // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.financing_cf is not none %}{{ "{:,.0f}".format(f.financing_cf // 1000000) }}{% else %}—{% endif %}</td>
-                <td class="num">{% if f.operating_cf is not none and f.investing_cf is not none %}{{ "{:,.0f}".format((f.operating_cf + f.investing_cf) // 1000000) }}{% else %}—{% endif %}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="section">
+        <div class="section-title">Balance Sheet & Cash Flow</div>
+        <table class="table-compact">
+            <thead>
+                <tr>
+                    <th>FY</th>
+                    <th class="num">Equity</th>
+                    <th class="num">BPS</th>
+                    <th class="num">OCF</th>
+                    <th class="num">FCF</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for f in financials|reverse %}
+                <tr>
+                    <td>{{ f.fiscal_year_end[:4] }}</td>
+                    <td class="num">{% if f.equity_ratio is not none %}{{ "%.0f"|format(f.equity_ratio * 100) }}%{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.bps is not none %}{{ "{:,.0f}".format(f.bps) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.operating_cf is not none %}{{ "{:,.0f}".format(f.operating_cf // 1000000) }}{% else %}—{% endif %}</td>
+                    <td class="num">{% if f.operating_cf is not none and f.investing_cf is not none %}{{ "{:,.0f}".format((f.operating_cf + f.investing_cf) // 1000000) }}{% else %}—{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="table-note">¥M except BPS (¥), Equity (%)</div>
+    </div>
 </div>
 {% endif %}
 
-{# --- Trend Chart --- #}
+{# --- Charts (3 across, responsive) --- #}
 {% if chart_data %}
-<div class="section">
-    <div class="chart-container">
-        {% set width = 560 %}
-        {% set height = 180 %}
-        {% set pad_l = 60 %}
-        {% set pad_r = 20 %}
-        {% set pad_t = 20 %}
-        {% set pad_b = 25 %}
-        {% set plot_w = width - pad_l - pad_r %}
-        {% set plot_h = height - pad_t - pad_b %}
-        {% set n = chart_data.years|length %}
-        {% set y_range = chart_data.y_max - chart_data.y_min %}
-        {% set y_range_safe = y_range if y_range > 0 else 1 %}
-        {% set bar_w = (plot_w / n * 0.5)|int %}
+{% set W = 320 %}
+{% set H = 160 %}
+{% set PL = 50 %}
+{% set PR = 10 %}
+{% set PT = 22 %}
+{% set PB = 22 %}
+{% set PW = W - PL - PR %}
+{% set PH = H - PT - PB %}
+{% set N = chart_data.years|length %}
+{% set BW = (PW / N * 0.35)|int %}
+{% set GAP = 2 %}
 
-        <svg viewBox="0 0 {{ width }} {{ height }}" xmlns="http://www.w3.org/2000/svg">
-            <line class="chart-axis" x1="{{ pad_l }}" y1="{{ pad_t }}" x2="{{ pad_l }}" y2="{{ pad_t + plot_h }}" />
-            {% set zero_y = (pad_t + (chart_data.y_max / y_range_safe * plot_h))|int %}
-            <line class="chart-axis" x1="{{ pad_l }}" y1="{{ zero_y }}" x2="{{ pad_l + plot_w }}" y2="{{ zero_y }}" />
-            {% for i in range(n) %}
-                {% set cx = pad_l + (plot_w / n * (i + 0.5)) %}
-                {% set x = (cx - bar_w / 2)|int %}
-                {% set val = chart_data.revenue[i] %}
-                {% set val_y = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
-                {% set bar_h = ((val / y_range_safe) * plot_h)|int %}
-                {% if bar_h > 0 %}
-                <rect class="chart-bar" x="{{ x }}" y="{{ val_y }}" width="{{ bar_w }}" height="{{ bar_h }}" />
-                {% endif %}
+{# Macro: y-coordinate from value given tick max/min #}
+
+<div class="chart-grid">
+    {# 1. Revenue & Net Income — paired bars #}
+    <div class="chart-container">
+        <div class="chart-title">Revenue & Net Income (¥M)</div>
+        {% set t = chart_data.rev_ticks %}
+        {% set rng = t.max - t.min %}
+        {% set rng_s = rng if rng > 0 else 1 %}
+        <svg viewBox="0 0 {{ W }} {{ H }}" xmlns="http://www.w3.org/2000/svg">
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ PT }}" x2="{{ PL }}" y2="{{ PT + PH }}" />
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ PT + PH }}" x2="{{ PL + PW }}" y2="{{ PT + PH }}" />
+            {% set mid_py = (PT + PH / 2)|int %}
+            <line class="chart-grid-line" x1="{{ PL }}" y1="{{ mid_py }}" x2="{{ PL + PW }}" y2="{{ mid_py }}" />
+            {% for i in range(N) %}
+                {% set cx = (PL + (PW / N * (i + 0.5)))|int %}
+                {% set rev = chart_data.revenue[i] %}
+                {% set ni = chart_data.net_income[i] %}
+                {% set rev_y = (PT + ((t.max - rev) / rng_s * PH))|int %}
+                {% set rev_h = PT + PH - rev_y %}
+                {% set ni_y = (PT + ((t.max - ni) / rng_s * PH))|int %}
+                {% set ni_h = PT + PH - ni_y %}
+                {% if rev_h > 0 %}<rect class="chart-bar" x="{{ cx - BW - GAP // 2 }}" y="{{ rev_y }}" width="{{ BW }}" height="{{ rev_h }}" />{% endif %}
+                {% if ni_h > 0 %}<rect class="chart-bar chart-bar-accent" x="{{ cx + GAP // 2 }}" y="{{ ni_y }}" width="{{ BW }}" height="{{ ni_h }}" />{% endif %}
+                <text class="chart-label" x="{{ cx }}" y="{{ H - 5 }}" text-anchor="middle">{{ chart_data.years[i] }}</text>
             {% endfor %}
-            {% set points = [] %}
-            {% for i in range(n) %}
-                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
-                {% set val = chart_data.net_income[i] %}
-                {% set cy = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
-                {% if points.append("{},{}".format(cx, cy)) %}{% endif %}
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + 4 }}" text-anchor="end">{{ t.max_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ mid_py + 4 }}" text-anchor="end">{{ t.mid_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + PH + 4 }}" text-anchor="end">{{ t.min_label }}</text>
+            <rect x="{{ W - 110 }}" y="3" width="6" height="6" class="chart-bar" />
+            <text class="chart-label" x="{{ W - 101 }}" y="9">Rev</text>
+            <rect x="{{ W - 65 }}" y="3" width="6" height="6" class="chart-bar chart-bar-accent" />
+            <text class="chart-label" x="{{ W - 56 }}" y="9">NI</text>
+        </svg>
+    </div>
+
+    {# 2. ROE & Equity Ratio — bars + line #}
+    <div class="chart-container">
+        <div class="chart-title">ROE & Equity Ratio (%)</div>
+        {% set t = chart_data.roe_ticks %}
+        {% set rng = t.max - t.min %}
+        {% set rng_s = rng if rng > 0 else 1 %}
+        <svg viewBox="0 0 {{ W }} {{ H }}" xmlns="http://www.w3.org/2000/svg">
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ PT }}" x2="{{ PL }}" y2="{{ PT + PH }}" />
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ PT + PH }}" x2="{{ PL + PW }}" y2="{{ PT + PH }}" />
+            {% set mid_py = (PT + PH / 2)|int %}
+            <line class="chart-grid-line" x1="{{ PL }}" y1="{{ mid_py }}" x2="{{ PL + PW }}" y2="{{ mid_py }}" />
+            {% for i in range(N) %}
+                {% set cx = (PL + (PW / N * (i + 0.5)))|int %}
+                {% set eq = chart_data.equity_ratio[i] %}
+                {% set eq_y = (PT + ((t.max - eq) / rng_s * PH))|int %}
+                {% set eq_h = PT + PH - eq_y %}
+                {% if eq_h > 0 %}<rect class="chart-bar chart-bar-eq" x="{{ cx - BW // 2 }}" y="{{ eq_y }}" width="{{ BW }}" height="{{ eq_h }}" />{% endif %}
+                <text class="chart-label" x="{{ cx }}" y="{{ H - 5 }}" text-anchor="middle">{{ chart_data.years[i] }}</text>
             {% endfor %}
-            <polyline class="chart-line" points="{{ points|join(' ') }}" />
-            {% for i in range(n) %}
-                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
-                {% set val = chart_data.net_income[i] %}
-                {% set cy = (pad_t + ((chart_data.y_max - val) / y_range_safe * plot_h))|int %}
-                <circle class="chart-dot" cx="{{ cx }}" cy="{{ cy }}" r="3" />
+            {% set pts = [] %}
+            {% for i in range(N) %}
+                {% set cx = (PL + (PW / N * (i + 0.5)))|int %}
+                {% set val = chart_data.roe[i] %}
+                {% set cy = (PT + ((t.max - val) / rng_s * PH))|int %}
+                {% if pts.append("{},{}".format(cx, cy)) %}{% endif %}
             {% endfor %}
-            {% for i in range(n) %}
-                {% set cx = (pad_l + (plot_w / n * (i + 0.5)))|int %}
-                <text class="chart-label" x="{{ cx }}" y="{{ height - 5 }}" text-anchor="middle">{{ chart_data.years[i] }}</text>
+            <polyline class="chart-line chart-line-roe" points="{{ pts|join(' ') }}" />
+            {% for i in range(N) %}
+                {% set cx = (PL + (PW / N * (i + 0.5)))|int %}
+                {% set val = chart_data.roe[i] %}
+                {% set cy = (PT + ((t.max - val) / rng_s * PH))|int %}
+                <circle class="chart-dot chart-dot-roe" cx="{{ cx }}" cy="{{ cy }}" r="2.5" />
             {% endfor %}
-            <text class="chart-label" x="{{ pad_l - 5 }}" y="{{ pad_t + 4 }}" text-anchor="end">{{ "{:,.0f}".format(chart_data.y_max) }}</text>
-            <rect x="{{ pad_l + 5 }}" y="{{ pad_t - 12 }}" width="8" height="8" class="chart-bar" />
-            <text class="chart-label" x="{{ pad_l + 16 }}" y="{{ pad_t - 4 }}">Revenue</text>
-            <line x1="{{ pad_l + 70 }}" y1="{{ pad_t - 8 }}" x2="{{ pad_l + 82 }}" y2="{{ pad_t - 8 }}" class="chart-line" />
-            <text class="chart-label" x="{{ pad_l + 85 }}" y="{{ pad_t - 4 }}">Net Income</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + 4 }}" text-anchor="end">{{ t.max_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ mid_py + 4 }}" text-anchor="end">{{ t.mid_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + PH + 4 }}" text-anchor="end">{{ t.min_label }}</text>
+            <rect x="{{ W - 120 }}" y="3" width="6" height="6" class="chart-bar chart-bar-eq" />
+            <text class="chart-label" x="{{ W - 111 }}" y="9">Equity</text>
+            <line x1="{{ W - 65 }}" y1="6" x2="{{ W - 55 }}" y2="6" class="chart-line chart-line-roe" />
+            <text class="chart-label" x="{{ W - 52 }}" y="9">ROE</text>
+        </svg>
+    </div>
+
+    {# 3. Cash Flow — paired bars (OCF + FCF) #}
+    <div class="chart-container">
+        <div class="chart-title">Cash Flow (¥M)</div>
+        {% set t = chart_data.cf_ticks %}
+        {% set rng = t.max - t.min %}
+        {% set rng_s = rng if rng > 0 else 1 %}
+        <svg viewBox="0 0 {{ W }} {{ H }}" xmlns="http://www.w3.org/2000/svg">
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ PT }}" x2="{{ PL }}" y2="{{ PT + PH }}" />
+            {% set zero_y = (PT + (t.max / rng_s * PH))|int %}
+            <line class="chart-axis" x1="{{ PL }}" y1="{{ zero_y }}" x2="{{ PL + PW }}" y2="{{ zero_y }}" />
+            {% set mid_py = (PT + PH / 2)|int %}
+            <line class="chart-grid-line" x1="{{ PL }}" y1="{{ mid_py }}" x2="{{ PL + PW }}" y2="{{ mid_py }}" />
+            {% for i in range(N) %}
+                {% set cx = (PL + (PW / N * (i + 0.5)))|int %}
+                {% set ocf = chart_data.ocf[i] %}
+                {% set fcf = chart_data.fcf[i] %}
+                {% set ocf_y = (PT + ((t.max - ocf) / rng_s * PH))|int %}
+                {% set fcf_y = (PT + ((t.max - fcf) / rng_s * PH))|int %}
+                {% if ocf >= 0 %}<rect class="chart-bar chart-bar-cf" x="{{ cx - BW - GAP // 2 }}" y="{{ ocf_y }}" width="{{ BW }}" height="{{ zero_y - ocf_y }}" />
+                {% else %}<rect class="chart-bar chart-bar-neg" x="{{ cx - BW - GAP // 2 }}" y="{{ zero_y }}" width="{{ BW }}" height="{{ ocf_y - zero_y }}" />{% endif %}
+                {% if fcf >= 0 %}<rect class="chart-bar chart-bar-cf-accent" x="{{ cx + GAP // 2 }}" y="{{ fcf_y }}" width="{{ BW }}" height="{{ zero_y - fcf_y }}" />
+                {% else %}<rect class="chart-bar chart-bar-neg" x="{{ cx + GAP // 2 }}" y="{{ zero_y }}" width="{{ BW }}" height="{{ fcf_y - zero_y }}" />{% endif %}
+                <text class="chart-label" x="{{ cx }}" y="{{ H - 5 }}" text-anchor="middle">{{ chart_data.years[i] }}</text>
+            {% endfor %}
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + 4 }}" text-anchor="end">{{ t.max_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ mid_py + 4 }}" text-anchor="end">{{ t.mid_label }}</text>
+            <text class="chart-label" x="{{ PL - 4 }}" y="{{ PT + PH + 4 }}" text-anchor="end">{{ t.min_label }}</text>
+            <rect x="{{ W - 110 }}" y="3" width="6" height="6" class="chart-bar chart-bar-cf" />
+            <text class="chart-label" x="{{ W - 101 }}" y="9">OCF</text>
+            <rect x="{{ W - 65 }}" y="3" width="6" height="6" class="chart-bar chart-bar-cf-accent" />
+            <text class="chart-label" x="{{ W - 56 }}" y="9">FCF</text>
         </svg>
     </div>
 </div>
 {% endif %}
 
-{# --- Shareholders --- #}
-{% if shareholders %}
-<div class="section">
-    <div class="section-title">Major Shareholders</div>
-    <table>
-        <thead><tr><th>Name</th><th class="num">Holding (%)</th></tr></thead>
-        <tbody>
-        {% for s in shareholders %}
-        <tr><td>{{ s.name }}{% if s.name_en %} <span class="name-en">{{ s.name_en }}</span>{% endif %}</td><td class="num">{{ "%.2f"|format(s.holding_ratio) }}</td></tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-{% endif %}
-
-{# --- Filing Activity --- #}
-{% if events or buybacks %}
-<div class="section">
-    <div class="section-title">Filing Activity</div>
-    <table>
-        <thead><tr><th>Date</th><th>Type</th><th>Detail</th></tr></thead>
-        <tbody>
-        {% for b in buybacks[:3] %}
-        <tr>
-            <td>{{ b.filing_date }}</td>
-            <td>Treasury Stock Report</td>
-            <td class="detail-cell">{% if b.board_resolution_text %}{{ b.board_resolution_text[:120] }}...{% else %}—{% endif %}</td>
-        </tr>
-        {% endfor %}
-        {% for e in events[:3] %}
-        <tr>
-            <td>{{ e.filing_date }}</td>
-            <td>Extraordinary Report</td>
-            <td class="detail-cell">{{ e.reason_for_filing[:120] + '...' if e.reason_for_filing and e.reason_for_filing|length > 120 else (e.reason_for_filing or '—') }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% if buybacks|length > 3 or events|length > 3 %}
-    <div class="table-note">Showing latest filings. {{ buybacks|length }} buyback reports, {{ events|length }} material events total.</div>
+{# --- Shareholders + Filing Activity (side by side) --- #}
+{% if shareholders or events or buybacks or financials %}
+<div class="two-col">
+    {% if shareholders %}
+    <div class="section">
+        <div class="section-title">Major Shareholders</div>
+        <table class="table-compact">
+            <thead><tr><th>Name</th><th class="num">%</th></tr></thead>
+            <tbody>
+            {% for s in shareholders %}
+            <tr><td>{{ s.name_en or s.name }}</td><td class="num">{{ "%.1f"|format(s.holding_ratio) }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% endif %}
+
+    <div class="section">
+        <div class="section-title">Filing Activity</div>
+        <table class="table-compact">
+            <thead><tr><th>Date</th><th>Type</th></tr></thead>
+            <tbody>
+            {% for f in financials[:3] %}
+            <tr><td>{{ f.fiscal_year_end }}</td><td>{{ doc_type_names.get('120', 'Securities Report') }}</td></tr>
+            {% endfor %}
+            {% for b in buybacks[:3] %}
+            <tr><td>{{ b.filing_date }}</td><td>{{ doc_type_names.get('220', 'Treasury Stock Report') }}</td></tr>
+            {% endfor %}
+            {% for e in events[:3] %}
+            <tr><td>{{ e.filing_date }}</td><td>{{ doc_type_names.get('180', 'Extraordinary Report') }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div class="table-note">{{ total_filings }} total filings ingested.</div>
+    </div>
 </div>
 {% endif %}
 
@@ -207,30 +251,48 @@
 <div class="agent-section">
     <div class="section-title">Analysis by Kabu Agents</div>
 
-    {% for i in range(analyst_data.theses|length) %}
-    <div class="thesis-block">
-        <div class="thesis-label">Thesis {{ i + 1 }}{% if cost_data and cost_data|length > 0 %} <span class="agent-model">{{ cost_data[0].model.split('/')[-1] }}</span>{% endif %}</div>
-        <div class="thesis-claim">{{ analyst_data.theses[i].thesis }}</div>
-        <div class="thesis-rationale">{{ analyst_data.theses[i].rationale }}</div>
+    {# --- Analyst: all theses --- #}
+    <div class="agent-phase">
+        <div class="agent-phase-label">Analyst{% if cost_data and cost_data|length > 0 %} <span class="agent-model">{{ cost_data[0].model.split('/')[-1] }}</span>{% endif %}</div>
+        {% for t in analyst_data.theses %}
+        <div class="thesis-block">
+            <div class="thesis-number">Thesis {{ loop.index }}</div>
+            <div class="thesis-claim">{{ t.thesis }}</div>
+            <div class="thesis-rationale">{{ t.rationale }}</div>
+        </div>
+        {% endfor %}
+    </div>
 
-        {% if skeptic_data and skeptic_data.challenges and i < skeptic_data.challenges|length %}
-        <div class="thesis-skeptic">
-            <div class="thesis-skeptic-label">Skeptic{% if cost_data and cost_data|length > 1 %} <span class="agent-model">{{ cost_data[1].model.split('/')[-1] }}</span>{% endif %}</div>
-            {% if skeptic_data.challenges[i].counters %}
-            <ul class="counter-list">
-                {% for cp in skeptic_data.challenges[i].counters %}
-                <li>{{ cp.point }}<span class="counter-source">{{ cp.source }}</span></li>
-                {% endfor %}
-            </ul>
+    {# --- Skeptic: challenges per thesis with footnote citations --- #}
+    {% if skeptic_data and skeptic_data.challenges %}
+    {% set footnotes = [] %}
+    <div class="agent-phase">
+        <div class="agent-phase-label">Skeptic{% if cost_data and cost_data|length > 1 %} <span class="agent-model">{{ cost_data[1].model.split('/')[-1] }}</span>{% endif %}</div>
+        {% for c in skeptic_data.challenges %}
+        <div class="challenge-block">
+            <div class="challenge-thesis">Thesis {{ loop.index }}{% if loop.index0 < analyst_data.theses|length %}: "{{ analyst_data.theses[loop.index0].thesis }}"{% endif %}</div>
+            {% if c.counters %}
+            {% for cp in c.counters %}
+            {% if footnotes.append(cp.source) %}{% endif %}
+            <div class="counter-point">{{ cp.point }} <sup class="footnote-ref">{{ footnotes|length }}</sup></div>
+            {% endfor %}
             {% endif %}
+        </div>
+        {% endfor %}
+        {% if footnotes %}
+        <div class="footnotes">
+            {% for fn in footnotes %}
+            <span class="footnote"><sup>{{ loop.index }}</sup> {{ fn }}</span>
+            {% endfor %}
         </div>
         {% endif %}
     </div>
-    {% endfor %}
+    {% endif %}
 
+    {# --- Outlook: synthesis --- #}
     {% if outlook_data %}
     <div class="outlook-section">
-        <div class="outlook-label">Outlook{% if cost_data and cost_data|length > 2 %} <span class="agent-model">{{ cost_data[2].model.split('/')[-1] }}</span>{% endif %}</div>
+        <div class="agent-phase-label">Outlook{% if cost_data and cost_data|length > 2 %} <span class="agent-model">{{ cost_data[2].model.split('/')[-1] }}</span>{% endif %}</div>
         <div class="outlook-text">{{ outlook_data.outlook }}</div>
     </div>
     {% endif %}
@@ -249,10 +311,14 @@
 {% elif entity %}
 {# ===== SKELETON FACTSHEET ===== #}
 <div class="company-header">
-    <span class="ticker">{{ ticker }}</span>
-    <span class="name">{{ entity.name_jp }}</span>
-    {% if entity.name_en %}<span class="name-en">{{ entity.name_en }}</span>{% endif %}
-    {% if entity.industry %}<span class="sector">{{ entity.industry }}</span>{% endif %}
+    <div class="company-header-top">
+        <span class="ticker">{{ ticker }}</span>
+        <span class="name">{{ entity.name_en or entity.name_jp }}</span>
+        {% if entity.industry %}<span class="sector">{{ entity.industry }}</span>{% endif %}
+    </div>
+    {% if entity.name_en and entity.name_jp != entity.name_en %}
+    <div class="name-jp">{{ entity.name_jp }}</div>
+    {% endif %}
 </div>
 
 <div class="skeleton-section">

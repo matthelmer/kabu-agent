@@ -23,38 +23,69 @@ from app import app, db
 from models import FilingIndex
 from pipeline import resolve_entity, upsert_company, ingest_doc_120
 
-# Seed companies — mix of profiles for screening contrast
+# Seed companies — 50 companies across sectors and market caps
 SEED_TICKERS = [
-    # ── Anchors — universally recognized large-caps ──────────────
+    # ── Large-caps — recognizable names ──────────────────────────
     "7203",  # Toyota Motor — automobiles, IFRS
     "6758",  # Sony Group — entertainment/electronics, IFRS
-    "6861",  # Keyence — factory automation sensors, 94% equity ratio
+    "6861",  # Keyence — factory automation sensors
     "7974",  # Nintendo — gaming, cash-rich
     "4063",  # Shin-Etsu Chemical — silicones & semiconductor wafers
+    "8035",  # Tokyo Electron — semiconductor equipment
+    "4568",  # Daiichi Sankyo — pharma, antibody-drug conjugates
+    "6981",  # Murata Manufacturing — ceramic capacitors, IFRS
 
-    # ── Mid-caps — interesting sectors ───────────────────────────
-    "6869",  # Sysmex — hematology analyzers / diagnostics, IFRS
-    "6268",  # Nabtesco — precision RV reducers for robot joints, IFRS
-    "6951",  # JEOL — electron microscopes, scientific instruments
-    "6101",  # Tsugami — CNC automatic lathes, IFRS, 19% ROE
+    # ── Mid-caps — industrials ───────────────────────────────────
+    "6869",  # Sysmex — hematology analyzers, IFRS
+    "6951",  # JEOL — electron microscopes
+    "6101",  # Tsugami — CNC automatic lathes, IFRS
+    "7730",  # MANI — surgical needles, 91% equity ratio
+    "1414",  # Sho-Bond Holdings — infrastructure repair
+    "5344",  # MARUWA — ceramic substrates
+    "6273",  # SMC — pneumatic components, 70%+ equity
+    "6146",  # DISCO — precision cutting/grinding for semis
+    "6920",  # Lasertec — EUV mask inspection
+    "6324",  # Harmonic Drive Systems — strain wave gears
+
+    # ── Mid-caps — tech & consumer ───────────────────────────────
+    "9697",  # Capcom — gaming, high ROE
+    "2801",  # Kikkoman — soy sauce, global brand
+    "2897",  # Nissin Foods — instant noodles, IFRS
+    "4519",  # Chugai Pharmaceutical — pharma, Roche subsidiary
+    "7453",  # Ryohin Keikaku — MUJI brand retail
+    "8697",  # Japan Exchange Group — stock exchange
+
+    # ── Small-caps — niche industrials ───────────────────────────
+    "6264",  # Marumae — precision vacuum parts for semis
+    "6327",  # Kitagawa Seiki — hot press machines
+    "4082",  # Daiichi Kigenso Kagaku — rare earth zirconium
+    "3446",  # JTEC Corp — ultra-precision optics
+    "5381",  # Mipox — precision polishing films
+    "4979",  # OAT Agrio — agrochemicals
+    "6039",  # JARM — veterinary referral hospitals
+    "5698",  # Envipro Holdings — metal recycling
+    "7727",  # Oval Corp — flow meters
+    "9115",  # Meiji Shipping — bulk shipping
     "4043",  # Tokuyama — semiconductor-grade polysilicon
-    "7730",  # MANI — surgical needles & dental instruments, 91% eq ratio
-    "1414",  # Sho-Bond Holdings — infrastructure repair specialist
-    "5344",  # MARUWA — ceramic substrates for electronics
-    "5702",  # Daiki Aluminium — secondary aluminium alloys
+    "5702",  # Daiki Aluminium — secondary aluminium
     "6016",  # Japan Engine Corp — marine diesel engines
+    "6055",  # Japan Material — gas supply for semis
 
-    # ── Small / micro-caps — niche businesses ────────────────────
-    "6264",  # Marumae — precision vacuum parts for semiconductor equipment
-    "6327",  # Kitagawa Seiki — hot press machines, 17% ROE
-    "4082",  # Daiichi Kigenso Kagaku — rare earth zirconium compounds
-    "3446",  # JTEC Corp — ultra-precision optics, low ROE contrast
-    "5381",  # Mipox — precision polishing films for semiconductors
-    "4979",  # OAT Agrio — agrochemicals / crop protection
-    "6039",  # JARM — veterinary referral hospital chain
-    "5698",  # Envipro Holdings — metal recycling / circular economy
-    "7727",  # Oval Corp — flow meters, low ROE contrast
-    "9115",  # Meiji Shipping — bulk shipping, 10% equity ratio
+    # ── Small-caps — niche services & software ───────────────────
+    "3921",  # NeoJapan — groupware (desknet's NEO)
+    "2477",  # Temairazu — hotel booking engine
+    "2163",  # Artner — engineering staffing
+    "4058",  # Toyokumo — safety confirmation SaaS
+    "9744",  # Meitec — engineering staffing
+    "6532",  # Baycurrent Consulting — IT/strategy consulting
+
+    # ── Small-caps — value / activist situations ─────────────────
+    "8011",  # Sanyo Shokai — apparel, deep value
+    "7294",  # Yorozu — auto suspension parts, undervalued
+    "5444",  # Yamato Kogyo — electric arc furnace steel
+    "7131",  # Nomura Micro Science — ultrapure water systems
+    "4107",  # Ise Chemicals — iodine / rare chemicals
+    "5218",  # Ohara — optical glass & glass-ceramics
 ]
 
 DAYS_BACK = 1095  # 3 years
