@@ -5,7 +5,7 @@ From EDINET filing to investment thesis.
 
 An agentic research pattern for Japanese equities.
 
-![Company factsheet](docs/factsheet-screenshot.png)
+<img src="docs/factsheet-screenshot.png" alt="Company factsheet" width="700">
 
 Ingests regulatory filings, extracts financials and shareholders, screens for quality indicators, then runs competing agents that produce investment theses from opposing perspectives.
 
