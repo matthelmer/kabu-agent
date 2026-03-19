@@ -7,3 +7,4 @@ dist/
 *.db
 !data/research.db
 downloads/
+.DS_Store

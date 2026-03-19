@@ -5,6 +5,8 @@ From EDINET filing to investment thesis.
 
 An agentic research pattern for Japanese equities.
 
+![Company factsheet](docs/factsheet-screenshot.png)
+
 Ingests regulatory filings, extracts financials and shareholders, screens for quality indicators, then runs competing agents that produce investment theses from opposing perspectives.
 
 [EDINET](https://disclosure.edinet-fsa.go.jp/) is Japan's regulatory filing system — the SEC EDGAR equivalent.
