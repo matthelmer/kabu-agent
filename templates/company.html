@@ -212,35 +212,41 @@
 {% if shareholders or events or buybacks or financials %}
 <div class="two-col">
     {% if shareholders %}
+    {% set max_holding = shareholders[0].holding_ratio if shareholders else 1 %}
     <div class="section">
         <div class="section-title">Major Shareholders</div>
-        <table class="table-compact">
-            <thead><tr><th>Name</th><th class="num">%</th></tr></thead>
-            <tbody>
-            {% for s in shareholders %}
-            <tr><td>{{ s.name_en or s.name }}</td><td class="num">{{ "%.1f"|format(s.holding_ratio) }}</td></tr>
+        <div class="shareholder-bars">
+            {% for s in shareholders[:10] %}
+            <div class="sh-row">
+                <div class="sh-name">{{ s.name_en or s.name }}</div>
+                <div class="sh-bar-wrap">
+                    <div class="sh-bar" style="width: {{ (s.holding_ratio / max_holding * 100)|int }}%"></div>
+                    <span class="sh-pct">{{ "%.1f"|format(s.holding_ratio) }}%</span>
+                </div>
+            </div>
             {% endfor %}
-            </tbody>
-        </table>
+        </div>
     </div>
     {% endif %}
 
     <div class="section">
-        <div class="section-title">Filing Activity</div>
-        <table class="table-compact">
-            <thead><tr><th>Date</th><th>Type</th></tr></thead>
-            <tbody>
-            {% for f in financials[:3] %}
-            <tr><td>{{ f.fiscal_year_end }}</td><td>{{ doc_type_names.get('120', 'Securities Report') }}</td></tr>
+        <div class="section-title">Filings Ingested</div>
+        {% set filing_types = [] %}
+        {% if financials %}{% if filing_types.append({'name': doc_type_names.get('120', 'Securities Report'), 'count': financials|length, 'latest': financials[0].fiscal_year_end[:4]}) %}{% endif %}{% endif %}
+        {% if events %}{% if filing_types.append({'name': doc_type_names.get('180', 'Extraordinary Report'), 'count': events|length, 'latest': events[0].filing_date[:4] if events[0].filing_date else ''}) %}{% endif %}{% endif %}
+        {% if buybacks %}{% if filing_types.append({'name': doc_type_names.get('220', 'Treasury Stock Report'), 'count': buybacks|length, 'latest': buybacks[0].filing_date[:4] if buybacks[0].filing_date else ''}) %}{% endif %}{% endif %}
+        {% set max_count = filing_types|map(attribute='count')|max if filing_types else 1 %}
+        <div class="filing-bars">
+            {% for ft in filing_types %}
+            <div class="fl-row">
+                <div class="fl-name">{{ ft.name }}</div>
+                <div class="fl-bar-wrap">
+                    <div class="fl-bar" style="width: {{ (ft.count / max_count * 100)|int }}%"></div>
+                    <span class="fl-count">{{ ft.count }}</span>
+                </div>
+            </div>
             {% endfor %}
-            {% for b in buybacks[:3] %}
-            <tr><td>{{ b.filing_date }}</td><td>{{ doc_type_names.get('220', 'Treasury Stock Report') }}</td></tr>
-            {% endfor %}
-            {% for e in events[:3] %}
-            <tr><td>{{ e.filing_date }}</td><td>{{ doc_type_names.get('180', 'Extraordinary Report') }}</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        </div>
         <div class="table-note">{{ total_filings }} total filings ingested.</div>
     </div>
 </div>

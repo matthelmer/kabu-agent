@@ -169,6 +169,88 @@ td.num, th.num {
     margin-top: 0.25rem;
 }
 
+/* === Shareholder Horizontal Bars === */
+.shareholder-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+.sh-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.3rem;
+    line-height: 1.2;
+}
+.sh-name {
+    font-size: 0.65rem;
+    color: var(--fg-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sh-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 120px;
+}
+.sh-bar {
+    height: 8px;
+    background: var(--accent);
+    opacity: 0.45;
+    border-radius: 1px;
+    min-width: 2px;
+}
+.sh-pct {
+    font-size: 0.6rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+    white-space: nowrap;
+    min-width: 2.5em;
+    text-align: right;
+}
+
+/* === Filing Activity Bars === */
+.filing-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: var(--gap-sm);
+}
+.fl-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 0.3rem;
+    line-height: 1.2;
+}
+.fl-name {
+    font-size: 0.65rem;
+    color: var(--fg-dim);
+    white-space: nowrap;
+}
+.fl-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    width: 80px;
+}
+.fl-bar {
+    height: 8px;
+    background: var(--accent);
+    opacity: 0.3;
+    border-radius: 1px;
+    min-width: 2px;
+}
+.fl-count {
+    font-size: 0.6rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-muted);
+    min-width: 1.5em;
+    text-align: right;
+}
+
 /* === Name hierarchy: English primary, Japanese secondary === */
 .name-jp {
     font-size: var(--fs-sm);
