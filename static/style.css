@@ -26,6 +26,21 @@
     --gap-sm: 0.75rem;
 }
 
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #161616;
+        --bg-alt: #1e1e1e;
+        --bg-skeleton: #1a1a18;
+        --fg: #e8e8e8;
+        --fg-dim: #aaa;
+        --fg-muted: #777;
+        --border: #333;
+        --border-skeleton: #444;
+        --accent: #ccc;
+        --accent-line: #60a5fa;
+    }
+}
+
 /* === Base === */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -423,14 +438,12 @@ td.num, th.num {
     font-size: var(--fs-sm);
     line-height: 1.6;
 }
-.challenge-block {
-    margin-bottom: var(--gap-sm);
-}
-.challenge-thesis {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+.challenge-block .thesis-number {
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: var(--fs-sm);
     color: var(--fg-muted);
     margin-bottom: 0.3rem;
 }
@@ -438,6 +451,15 @@ td.num, th.num {
     font-size: var(--fs-sm);
     line-height: 1.6;
     margin-bottom: 0.3rem;
+    padding-left: 1.1rem;
+    position: relative;
+}
+.counter-point::before {
+    content: "↳";
+    position: absolute;
+    left: 0;
+    color: var(--fg-muted);
+    font-size: var(--fs-xs);
 }
 .footnote-ref {
     font-size: var(--fs-xs);

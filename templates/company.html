@@ -275,8 +275,8 @@
     <div class="agent-phase">
         <div class="agent-phase-label">Skeptic{% if cost_data and cost_data|length > 1 %} <span class="agent-model">{{ cost_data[1].model.split('/')[-1] }}</span>{% endif %}</div>
         {% for c in skeptic_data.challenges %}
-        <div class="challenge-block">
-            <div class="challenge-thesis">Thesis {{ loop.index }}{% if loop.index0 < analyst_data.theses|length %}: "{{ analyst_data.theses[loop.index0].thesis }}"{% endif %}</div>
+        <div class="thesis-block challenge-block">
+            <div class="thesis-number">Thesis {{ loop.index }}{% if loop.index0 < analyst_data.theses|length %} — "{{ analyst_data.theses[loop.index0].thesis }}"{% endif %}</div>
             {% if c.counters %}
             {% for cp in c.counters %}
             {% if footnotes.append(cp.source) %}{% endif %}
