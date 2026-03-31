@@ -27,7 +27,7 @@ A few have pre-computed agent analyses so you can see the full output without co
     python pipeline.py 6758 --doc-type 220     # buyback activity
     python seed.py --rebuild-index             # refresh filing index
 
-Any of 3,800+ listed companies.  Each doc type adds data to the company factsheet.
+Any of 3,800+ listed companies.  Each doc type adds data to the company factsheet.  edinet-tools 0.5.0 provides typed parsers for all 42 EDINET document types, including tender offers, board opinions, internal control reports, and large shareholding filings.
 
 ## Analyze — add LLM keys
 
@@ -76,7 +76,7 @@ App runs locally.  The database is SQLite.  Add companies, doc types, screening 
 
 The production system runs daily across 400K+ filings and 3,800 listed companies. I use it to make investment decisions. This repo demonstrates one pattern for agentic research on Japanese equities.
 
-Built on [edinet-tools](https://github.com/matthelmer/edinet-tools) and Simon Willison's [llm](https://github.com/simonw/llm).
+Built on [edinet-tools](https://github.com/matthelmer/edinet-tools) (v0.5.0, all 42 EDINET doc types) and Simon Willison's [llm](https://github.com/simonw/llm).
 
 ---
 
